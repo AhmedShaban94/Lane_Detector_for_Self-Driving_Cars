@@ -1,22 +1,30 @@
-///////////////////// Sharpening the image using filter2D of OpenCV ////////////////////
-
-
-//Note: cv::saturate_cast<type>(): is used to make shure that the pixel will not exceed or under 
-// the specified data_type, to prevent overflow of underflow. ex. uchar 0->255, the values above 
-//255 will return to 255 and values under 0 will set to 0. 
-
-#include <opencv2\opencv.hpp>
-#include <opencv2\imgproc\imgproc.hpp>
-#include <opencv2\core\core.hpp> 
-
+#include "LaneDetector.h"
 
 int main()
 {
-	cv::Mat image, edges; 
-	image = cv::imread("coins.jpg", cv::IMREAD_UNCHANGED);  
-	cv::resize(image, image, cv::Size(image.size().width / 4, image.size().height / 4)); 
-	cv::Canny(image, edges, 150, 500); 
-	cv::imshow("coins", edges);  
-	cv::waitKey(); 
+	double resize_factor = 0.75; 
+	cv::VideoCapture stream("project_video.mp4");
+	cv::Mat frame, deNoisedFrame, edges, mask;
+	std::unique_ptr<LaneDetector> laneDetector = std::make_unique<LaneDetector>();
+
+	while (1)
+	{
+		stream >> frame;
+		if (!frame.empty())
+		{
+			cv::resize(frame, frame, cv::Size(), resize_factor, resize_factor, cv::INTER_LINEAR);
+			deNoisedFrame = laneDetector->deNoise(frame);
+			edges = laneDetector->edgeDetector(deNoisedFrame);
+			mask = laneDetector->mask(edges, resize_factor);
+			cv::imshow("video", mask);
+		}
+		else
+			break;
+		char c = static_cast<char> (cv::waitKey(25));
+		if (c == 27)
+			break;
+	}
+	stream.release();
+	cv::destroyAllWindows();
 	return EXIT_SUCCESS;
 }

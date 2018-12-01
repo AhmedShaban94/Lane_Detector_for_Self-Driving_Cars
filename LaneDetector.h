@@ -4,6 +4,7 @@
 #include <string>
 #include <opencv2\opencv.hpp>
 #include <opencv2\highgui.hpp> 
+#include <memory>
 
 class LaneDetector
 {
@@ -20,5 +21,8 @@ private:
 public:
 	LaneDetector();
 	~LaneDetector();
+	cv::Mat deNoise(const cv::Mat& frame); 
+	cv::Mat edgeDetector(const cv::Mat deNoisedFrame); 
+	cv::Mat mask(const cv::Mat edges,const double resize_factor); 
 };
 
