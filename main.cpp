@@ -7,20 +7,40 @@ int main()
 	cv::Mat frame, deNoisedFrame, edges, mask;
 	std::unique_ptr<LaneDetector> laneDetector = std::make_unique<LaneDetector>();
 
+	if (!stream.isOpened())
+		return EXIT_FAILURE;
+
 	while (1)
 	{
 		stream >> frame;
 		if (!frame.empty())
 		{
-			cv::resize(frame, frame, cv::Size(), resize_factor, resize_factor, cv::INTER_LINEAR);
-			deNoisedFrame = laneDetector->deNoise(frame);
+			// Image denoiseing using gaussian filter blurring.  
+			deNoisedFrame = laneDetector->deNoise(frame); //tested. 
+			// Edge detection using Canny Edge detector.
 			edges = laneDetector->edgeDetector(deNoisedFrame);
-			mask = laneDetector->mask(edges, resize_factor);
-			cv::imshow("video", mask);
+			// masking each frame to focus on ROI (region of interest). [rect polygone]
+			mask = laneDetector->mask(edges);
+			//// Detecting Line in each frame using HoughLines (transform). 
+			auto lines = laneDetector->houghLines(mask); 
+			
+			if (!lines.empty())
+			{
+				//Classify line into right/left lines 
+				auto right_left_lines = laneDetector->classifyLines(lines, edges); 
+				//Fitting lines into boundary of lane. 
+				auto lane = laneDetector->regression(right_left_lines, frame); 
+				//Predicting turn of the car based on slope of lines. 
+				auto turn = laneDetector->predictTurn(); 
+				//Plotting final frame to be displayed. 
+				auto final_frame = laneDetector->plotLane(frame, lane, turn);
+				//Show final frame. 
+				cv::imshow("Lane Detection", final_frame); 
+			}
 		}
 		else
 			break;
-		char c = static_cast<char> (cv::waitKey(25));
+		char c = static_cast<char> (cv::waitKey(30));
 		if (c == 27)
 			break;
 	}
