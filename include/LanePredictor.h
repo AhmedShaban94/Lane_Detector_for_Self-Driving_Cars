@@ -10,18 +10,6 @@
 
 class LanePredictor
 {
-private:
-	double img_center_;
-
-	bool left_flag_;  // Tells us if there's left boundary of lane detected
-	bool right_flag_;  // Tells us if there's right boundary of lane detected
-
-	cv::Point right_b_;  // Members of both line equations of the lane boundaries:
-	double right_m_;  // y = m*x + b
-
-	cv::Point left_b_;
-	double left_m;
-
 public:
 
 	// Rule of Five.
@@ -86,4 +74,17 @@ public:
 	std::pair<std::vector<cv::Vec4i>, std::vector<cv::Vec4i>> classifyLines(const std::vector<cv::Vec4i>& lines, const cv::Mat img_edges);  // Sprt detected lines by their slope into right and left lines
 	std::vector<cv::Point> regression(const std::pair<std::vector<cv::Vec4i>, std::vector<cv::Vec4i>>& left_right_lines, const cv::Mat inputImage);  // Get only one line for each side of the lane
 	std::string predictTurn();  // Determine if the lane is turning or not by calculating the position of the vanishing point
+
+private:
+	double img_center_;
+
+	bool left_flag_;  // Tells us if there's left boundary of lane detected
+	bool right_flag_;  // Tells us if there's right boundary of lane detected
+
+	cv::Point right_b_;  // Members of both line equations of the lane boundaries:
+	double right_m_;  // y = m*x + b
+
+	cv::Point left_b_;
+	double left_m;
+
 };

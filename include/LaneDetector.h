@@ -7,6 +7,7 @@
 #include <memory> 
 #include "LaneCalculator.h"
 #include "LanePredictor.h"
+#include "LanePlotter.h"
 
 class LaneDetector
 {
@@ -26,8 +27,10 @@ private:
 public:
 	std::unique_ptr<LaneCalculator> calculator_;
 	std::unique_ptr<LanePredictor> predictor_;
+	std::unique_ptr<LanePlotter> plotter_;
 	LaneDetector() : calculator_{ std::make_unique<LaneCalculator>() },
-		predictor_{ std::make_unique<LanePredictor>() }
+		predictor_{ std::make_unique<LanePredictor>() },
+		plotter_{ std::make_unique<LanePlotter>() }
 	{}
 	std::vector<cv::Vec4i> CalculateLane(const cv::Mat);
 
@@ -38,9 +41,9 @@ public:
 	std::vector<cv::Vec4i> houghLines(const cv::Mat img_mask);  // Detect Hough lines in masked edges image
 
 	// Predictor functions 
-	//std::pair<std::vector<cv::Vec4i>, std::vector<cv::Vec4i>> classifyLines(const std::vector<cv::Vec4i>& lines, const cv::Mat img_edges);  // Sprt detected lines by their slope into right and left lines
-	//std::vector<cv::Point> regression(const std::pair<std::vector<cv::Vec4i>, std::vector<cv::Vec4i>>& left_right_lines, const cv::Mat inputImage);  // Get only one line for each side of the lane
-	//std::string predictTurn();  // Determine if the lane is turning or not by calculating the position of the vanishing point
+	std::pair<std::vector<cv::Vec4i>, std::vector<cv::Vec4i>> classifyLines(const std::vector<cv::Vec4i>& lines, const cv::Mat img_edges);  // Sprt detected lines by their slope into right and left lines
+	std::vector<cv::Point> regression(const std::pair<std::vector<cv::Vec4i>, std::vector<cv::Vec4i>>& left_right_lines, const cv::Mat inputImage);  // Get only one line for each side of the lane
+	std::string predictTurn();  // Determine if the lane is turning or not by calculating the position of the vanishing point
 
 	// plotter functions 
 	cv::Mat plotLane(cv::Mat inputImage, std::vector<cv::Point> lane, std::string turn);  // Plot the resultant lane and turn prediction in the frame.
