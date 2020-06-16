@@ -9,6 +9,8 @@
 class LanePlotter
 {
 public:
-	// plotter functions 
+	// plotter functions
+	LanePlotter() = default;
+	virtual ~LanePlotter() = default;
 	cv::Mat plotLane(cv::Mat inputImage, std::vector<cv::Point> lane, const std::string& turn);
 };

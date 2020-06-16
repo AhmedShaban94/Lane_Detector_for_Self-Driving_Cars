@@ -6,7 +6,7 @@
 #include "opencv2/opencv.hpp"
 #include <memory>
 
-//using Line = cv::Vec4i;
+using Line = cv::Vec4i;
 
 class LanePredictor
 {
@@ -71,8 +71,8 @@ public:
 		return *this;
 	}
 
-	std::pair<std::vector<cv::Vec4i>, std::vector<cv::Vec4i>> classifyLines(const std::vector<cv::Vec4i>& lines, const cv::Mat img_edges);  // Sprt detected lines by their slope into right and left lines
-	std::vector<cv::Point> regression(const std::pair<std::vector<cv::Vec4i>, std::vector<cv::Vec4i>>& left_right_lines, const cv::Mat inputImage);  // Get only one line for each side of the lane
+	std::pair<std::vector<Line>, std::vector<Line>> classifyLines(const std::vector<Line>& lines, const cv::Mat img_edges);  // Sprt detected lines by their slope into right and left lines
+	std::vector<cv::Point> regression(const std::pair<std::vector<Line>, std::vector<Line>>& left_right_lines, const cv::Mat inputImage);  // Get only one line for each side of the lane
 	std::string predictTurn();  // Determine if the lane is turning or not by calculating the position of the vanishing point
 
 private:

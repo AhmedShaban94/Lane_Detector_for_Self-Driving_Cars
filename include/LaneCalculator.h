@@ -46,12 +46,12 @@ public:
 
 	cv::Mat deNoise();  // Apply Gaussian blurring to the input Image
 	cv::Mat edgeDetector(cv::Mat);  // Filter the image to obtain only edges
-	cv::Mat mask(const cv::Mat);  // Mask the edges image to only care about ROI
-	std::vector<cv::Vec4i> houghLines(const cv::Mat);  // Detect Hough lines in masked edges image
+	cv::Mat mask(cv::Mat);  // Mask the edges image to only care about ROI
+	std::vector<cv::Vec4i> houghLines(cv::Mat);  // Detect Hough lines in masked edges image
 
 	// setters and getters
-	cv::Mat GetInputImage() const { return inputImage_; }
-	void SetInputImage(const cv::Mat source) { inputImage_ = source; }
+	cv::Mat GetInputImage() const { return inputImage_.clone(); }
+	void SetInputImage(cv::Mat source) { inputImage_ = source; }
 private:
 	cv::Mat inputImage_;
 };

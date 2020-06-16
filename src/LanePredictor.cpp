@@ -1,14 +1,14 @@
 #include "LanePredictor.h"
 
 // SORT RIGHT AND LEFT LINES
-std::pair<std::vector<cv::Vec4i>, std::vector<cv::Vec4i>> LanePredictor::classifyLines(const std::vector<cv::Vec4i>& lines, cv::Mat img_edges)
+std::pair<std::vector<Line>, std::vector<Line>> LanePredictor::classifyLines(const std::vector<Line>& lines, cv::Mat img_edges)
 {
 	cv::Point ini;
 	cv::Point fini;
-	double slope_thresh = 0.3;
+	constexpr double slope_thresh = 0.3;
 	std::vector<double> slopes;
-	std::vector<cv::Vec4i> selected_lines;
-	std::vector<cv::Vec4i> right_lines, left_lines;
+	std::vector<Line> selected_lines;
+	std::vector<Line> right_lines, left_lines;
 
 	// Calculate the slope of all the detected lines
 	for (const auto& line : lines) {
@@ -28,12 +28,12 @@ std::pair<std::vector<cv::Vec4i>, std::vector<cv::Vec4i>> LanePredictor::classif
 
 	// Split the lines into right and left lines
 	img_center_ = static_cast<double>((img_edges.cols / 2));
-	std::vector<cv::Vec4i>::const_iterator selected_lines_iter;
+	std::vector<Line>::const_iterator selected_lines_iter;
 	std::vector<double>::const_iterator slopes_iter;
 
 	for (selected_lines_iter = selected_lines.begin(), slopes_iter = slopes.begin();
 		selected_lines_iter != selected_lines.end(), slopes_iter != slopes.end();
-		selected_lines_iter++, slopes_iter++)
+		++selected_lines_iter, ++slopes_iter)
 	{
 		auto selected_line = *selected_lines_iter;
 		ini = cv::Point(selected_line[0], selected_line[1]);
@@ -55,12 +55,8 @@ std::pair<std::vector<cv::Vec4i>, std::vector<cv::Vec4i>> LanePredictor::classif
 }
 
 // REGRESSION FOR LEFT AND RIGHT LINES
-std::vector<cv::Point> LanePredictor::regression(const std::pair<std::vector<cv::Vec4i>, std::vector<cv::Vec4i>>& left_right_lines, cv::Mat inputImage) {
+std::vector<cv::Point> LanePredictor::regression(const std::pair<std::vector<Line>, std::vector<Line>>& left_right_lines, cv::Mat inputImage) {
 	std::vector<cv::Point> output(4);
-	cv::Point ini;
-	cv::Point fini;
-	cv::Point ini2;
-	cv::Point fini2;
 	cv::Vec4d right_line;
 	cv::Vec4d left_line;
 	std::vector<cv::Point> right_pts;
@@ -69,8 +65,8 @@ std::vector<cv::Point> LanePredictor::regression(const std::pair<std::vector<cv:
 	// If right lines are being detected, fit a line using all the init and final points of the lines
 	if (right_flag_ == true) {
 		for (const auto& line : left_right_lines.first) {
-			ini = cv::Point(line[0], line[1]);
-			fini = cv::Point(line[2], line[3]);
+			cv::Point ini = cv::Point(line[0], line[1]);
+			cv::Point fini = cv::Point(line[2], line[3]);
 
 			right_pts.push_back(ini);
 			right_pts.push_back(fini);
@@ -88,8 +84,8 @@ std::vector<cv::Point> LanePredictor::regression(const std::pair<std::vector<cv:
 	if (left_flag_ == true) {
 		for (const auto& line : left_right_lines.second)
 		{
-			ini2 = cv::Point(line[0], line[1]);
-			fini2 = cv::Point(line[2], line[3]);
+			cv::Point ini2 = cv::Point(line[0], line[1]);
+			cv::Point fini2 = cv::Point(line[2], line[3]);
 
 			left_pts.push_back(ini2);
 			left_pts.push_back(fini2);
@@ -105,7 +101,7 @@ std::vector<cv::Point> LanePredictor::regression(const std::pair<std::vector<cv:
 
 	// One the slope and offset points have been obtained, apply the line equation to obtain the line points
 	int ini_y = inputImage.rows;
-	int fin_y = 470;
+	constexpr int fin_y = 470;
 
 	double right_ini_x = ((ini_y - right_b_.y) / right_m_) + right_b_.x;
 	double right_fin_x = ((fin_y - right_b_.y) / right_m_) + right_b_.x;
@@ -125,11 +121,11 @@ std::vector<cv::Point> LanePredictor::regression(const std::pair<std::vector<cv:
 std::string LanePredictor::predictTurn()
 {
 	std::string output;
-	double vanish_x;
-	double thr_vp = 10;
+	constexpr double thr_vp = 10;
 
 	// The vanishing point is the point where both lane boundary lines intersect
-	vanish_x = static_cast<double>(((right_m_ * right_b_.x) - (left_m * left_b_.x) - right_b_.y + left_b_.y) / (right_m_ - left_m));
+	const double vanish_x = static_cast<double>(((right_m_ * right_b_.x) - (left_m * left_b_.x) - right_b_.y + left_b_.y) / (
+		right_m_ - left_m));
 
 	// The vanishing points location determines where is the road turning
 	if (vanish_x < (img_center_ - thr_vp))
