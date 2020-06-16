@@ -1,10 +1,11 @@
 #include "LaneDetector.h"
-#include "LanePredictor.h"
+
+// TODO: implementation of VideoController class to control reading/writing output. 
 
 int main()
 {
 	cv::VideoCapture stream("project_video.mp4");
-	cv::Mat frame, deNoisedFrame, edges, mask;
+	cv::Mat frame;
 	LaneDetector laneDetector;
 
 	if (!stream.isOpened())
@@ -34,7 +35,7 @@ int main()
 		const char key = static_cast<char> (cv::waitKey(30));
 		if (key == 27)
 			break;
-		else if (key == 'p')
+		else if (key == 'p') // presss p to pause. 
 			cv::waitKey(-1);
 	}
 	stream.release();
