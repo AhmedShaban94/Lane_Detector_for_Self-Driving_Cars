@@ -6,7 +6,7 @@ find_package(OpenCV REQUIRED)
 
 FILE(GLOB SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp)
 
-add_executable(laneDetector ${SOURCES} ${PROJECT_SOURCE_DIR}/main.cpp)
+add_executable(laneDetector ${SOURCES})
 target_include_directories(laneDetector PUBLIC ${PROJECT_SOURCE_DIR}/include ${OpenCV_INCLUDE_DIRS})
 target_link_libraries(laneDetector PRIVATE ${OpenCV_LIBS})
 target_compile_features(laneDetector PRIVATE cxx_std_17)
