@@ -1,8 +1,7 @@
 #include "LaneDetector.h"
-
 int main()
 {
-	double resize_factor = 0.75; 
+	double resize_factor = 0.75;
 	cv::VideoCapture stream("project_video.mp4");
 	cv::Mat frame, deNoisedFrame, edges, mask;
 	std::unique_ptr<LaneDetector> laneDetector = std::make_unique<LaneDetector>();
@@ -10,7 +9,7 @@ int main()
 	if (!stream.isOpened())
 		return EXIT_FAILURE;
 
-	while (1)
+	while (true)
 	{
 		stream >> frame;
 		if (!frame.empty())
@@ -22,20 +21,20 @@ int main()
 			// masking each frame to focus on ROI (region of interest). [rect polygone]
 			mask = laneDetector->mask(edges);
 			//// Detecting Line in each frame using HoughLines (transform). 
-			auto lines = laneDetector->houghLines(mask); 
-			
+			auto lines = laneDetector->houghLines(mask);
+
 			if (!lines.empty())
 			{
 				//Classify line into right/left lines 
-				auto right_left_lines = laneDetector->classifyLines(lines, edges); 
+				auto right_left_lines = laneDetector->classifyLines(lines, edges);
 				//Fitting lines into boundary of lane. 
-				auto lane = laneDetector->regression(right_left_lines, frame); 
+				auto lane = laneDetector->regression(right_left_lines, frame);
 				//Predicting turn of the car based on slope of lines. 
-				auto turn = laneDetector->predictTurn(); 
+				auto turn = laneDetector->predictTurn();
 				//Plotting final frame to be displayed. 
 				auto final_frame = laneDetector->plotLane(frame, lane, turn);
 				//Show final frame. 
-				cv::imshow("Lane Detection", final_frame); 
+				cv::imshow("Lane Detection", final_frame);
 			}
 		}
 		else

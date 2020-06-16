@@ -1,6 +1,7 @@
 #include <string>
 #include <vector>
 #include "opencv2/opencv.hpp"
+#include "opencv2/core.hpp"
 #include "LaneDetector.h"
 
 LaneDetector::LaneDetector() {}
@@ -127,7 +128,7 @@ std::vector<cv::Point> LaneDetector::regression(const std::pair<std::vector<cv::
 
 		if (right_pts.size() > 0) {
 			// The right line is formed here
-			cv::fitLine(right_pts, right_line, CV_DIST_L2, 0, 0.01, 0.01);
+			cv::fitLine(right_pts, right_line, cv::DIST_L2, 0, 0.01, 0.01);
 			right_m = right_line[1] / right_line[0];
 			right_b = cv::Point(right_line[2], right_line[3]);
 		}
@@ -146,7 +147,7 @@ std::vector<cv::Point> LaneDetector::regression(const std::pair<std::vector<cv::
 
 		if (left_pts.size() > 0) {
 			// The left line is formed here
-			cv::fitLine(left_pts, left_line, CV_DIST_L2, 0, 0.01, 0.01);
+			cv::fitLine(left_pts, left_line, cv::DIST_L2, 0, 0.01, 0.01);
 			left_m = left_line[1] / left_line[0];
 			left_b = cv::Point(left_line[2], left_line[3]);
 		}
@@ -178,7 +179,7 @@ std::string LaneDetector::predictTurn()
 	double thr_vp = 10;
 
 	// The vanishing point is the point where both lane boundary lines intersect
-	vanish_x = static_cast<double>(((right_m*right_b.x) - (left_m*left_b.x) - right_b.y + left_b.y) / (right_m - left_m));
+	vanish_x = static_cast<double>(((right_m * right_b.x) - (left_m * left_b.x) - right_b.y + left_b.y) / (right_m - left_m));
 
 	// The vanishing points location determines where is the road turning
 	if (vanish_x < (img_center - thr_vp))
@@ -198,17 +199,18 @@ cv::Mat LaneDetector::plotLane(cv::Mat inputImage, std::vector<cv::Point> lane, 
 
 	// Create the transparent polygon for a better visualization of the lane
 	inputImage.copyTo(output);
-	std::vector<cv::Point> poly_points{ lane[2], lane[0], lane[1], lane[3] };
-	cv::fillConvexPoly(output, poly_points, cv::Scalar(0, 255, 0), CV_AA, 0);
+	const std::vector<cv::Point> poly_points{ lane[2], lane[0], lane[1], lane[3] };
+	cv::fillConvexPoly(output, poly_points, cv::Scalar(0, 255, 0), cv::LINE_AA, 0);
 	cv::addWeighted(output, 0.3, inputImage, 0.7, 0, inputImage);
 
 	// Plot both lines of the lane boundary
 	cv::Point center_point(inputImage.size().width / 2, inputImage.size().height / 2);
-	cv::line(inputImage, lane[0], lane[1], cv::Scalar(0, 0, 255), 5, CV_AA);
-	cv::line(inputImage, lane[2], lane[3], cv::Scalar(0, 0, 255), 5, CV_AA);
+	cv::line(inputImage, lane[0], lane[1], cv::Scalar(0, 0, 255), 5, cv::LINE_AA);
+	cv::line(inputImage, lane[2], lane[3], cv::Scalar(0, 0, 255), 5, cv::LINE_AA);
 	//cv::arrowedLine(inputImage, )
 	// Plot the turn message
-	cv::putText(inputImage, turn, cv::Point(50, 90), cv::FONT_HERSHEY_SIMPLEX, 3, cvScalar(0, 0, 255), 1, CV_AA);
+	cv::putText(inputImage, turn, cv::Point(50, 90), cv::FONT_HERSHEY_SIMPLEX
+		, 3, cv::Scalar(0, 0, 255), 1, cv::LINE_AA);
 
 	// Show the final output image
 	return inputImage;
