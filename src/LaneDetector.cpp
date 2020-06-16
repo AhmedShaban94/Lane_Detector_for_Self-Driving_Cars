@@ -24,3 +24,21 @@ std::vector<cv::Vec4i> LaneDetector::CalculateLane(cv::Mat frame)
 	return lines;
 }
 
+std::pair<std::vector<cv::Point>, std::string> LaneDetector::PredictLaneTurn(const std::vector<cv::Vec4i>& lines, cv::Mat img_edges)
+{
+	//Classify line into right/left lines 
+	auto right_left_lines = predictor_->classifyLines(lines, img_edges);
+
+	//Fitting lines into boundary of lane. 
+	auto lane = predictor_->regression(right_left_lines, img_edges);
+
+	//Predicting turn of the car based on slope of lines. 
+	auto turn = predictor_->predictTurn();
+
+	return std::make_pair(lane, turn);
+}
+
+cv::Mat LaneDetector::plotLaneOnFrame(cv::Mat inputImage, std::vector<cv::Point> lane, const std::string& turn)
+{
+	return plotter_->plotLane(inputImage, lane, turn);
+}

@@ -15,35 +15,15 @@ int main()
 		stream >> frame;
 		if (!frame.empty())
 		{
-			// to implement set input_image
-			laneDetector.calculator_->SetInputImage(frame); //tested
-
-			// Image denoiseing using gaussian filter blurring.   
-			deNoisedFrame = laneDetector.calculator_->deNoise(); //tested. 
-
-			// Edge detection using Canny Edge detector.
-			edges = laneDetector.calculator_->edgeDetector(deNoisedFrame);
-
-			// masking each frame to focus on ROI (region of interest). [rect polygone]
-			mask = laneDetector.calculator_->mask(edges);
-
-			// Detecting Line in each frame using HoughLines (transform). 
-			auto lines = laneDetector.calculator_->houghLines(mask);
-			//auto lines = laneDetector->CalculateLane(frame);
+			const auto lines = laneDetector.CalculateLane(frame);
 
 			if (!lines.empty())
 			{
-				//Classify line into right/left lines 
-				auto right_left_lines = laneDetector.predictor_->classifyLines(lines, frame);
-
-				//Fitting lines into boundary of lane. 
-				auto lane = laneDetector.predictor_->regression(right_left_lines, frame);
-
-				//Predicting turn of the car based on slope of lines. 
-				auto turn = laneDetector.predictor_->predictTurn();
+				// Turn prediction 
+				const auto [lane, turn] = laneDetector.PredictLaneTurn(lines, frame);
 
 				//Plotting final frame to be displayed. 
-				auto final_frame = laneDetector.plotter_->plotLane(frame, lane, turn);
+				auto final_frame = laneDetector.plotLaneOnFrame(frame, lane, turn);
 
 				//Show final frame. 
 				cv::imshow("Lane Detection", final_frame);

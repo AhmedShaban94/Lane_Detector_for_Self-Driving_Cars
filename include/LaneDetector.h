@@ -27,7 +27,7 @@ public:
 	std::vector<cv::Vec4i> CalculateLane(cv::Mat);
 
 	// predict lane turn
-	std::string PredictLaneTurn(const std::vector<cv::Vec4i>& lines, cv::Mat img_edges);
+	std::pair<std::vector<cv::Point>, std::string> PredictLaneTurn(const std::vector<cv::Vec4i>& lines, cv::Mat img_edges);
 
 	// plot lane of frame
 	cv::Mat plotLaneOnFrame(cv::Mat inputImage, std::vector<cv::Point> lane, const std::string& turn);
